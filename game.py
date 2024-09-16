@@ -1,16 +1,17 @@
+# imports
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from random import *
-#from square import *
 import sys
-#import os
 
+# global vars for game settings
 LENGTH = 10
 WIDTH = 10
 MINES = 3
 GRID = []
 
+# class for a square in the game and its related features
 class Square(QPushButton):
     def __init__(self, window, x, y):
         super().__init__(parent=window)
@@ -22,17 +23,18 @@ class Square(QPushButton):
         self.clicked.connect(self.clickHandle)
         self.setStyleSheet("padding: 0; margin: 0;")
         self.flagged = False
-        #self.setFixedSize(40, 40)
         self.setStyleSheet("background-color: #E1E1E1;")
 
+    # handle all clicks on the square
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.MouseButton.RightButton:
+        if event.button() == Qt.MouseButton.RightButton: # right
             self.rightClickHandle()
-        else:
+        else: # left
             self.clickHandle()
-
+    # determine how many flags are adjacent to the square
     def adjacentFlags(self):
         num = 0
+        # check surrounding squares in grid matrix
         for i in range(self.x-1, self.x+2):
             for j in range(self.y-1, self.y+2):
                 try:
@@ -41,7 +43,7 @@ class Square(QPushButton):
                 except:
                     pass
         return num
-
+    # handle left clicks on square
     def clickHandle(self):
         global GRID
         if self.state == "Safe" and self.uncovered and self.adjacentFlags() >= self.number:
@@ -54,20 +56,20 @@ class Square(QPushButton):
                                 except:
                                     pass
 
-        elif self.state == "Safe" and self.number == 0:
+        elif self.state == "Safe" and self.number == 0: # safe blank square
             self.setEnabled(False)
             self.setStyleSheet("background - color : #787878")
             self.uncover()
-        elif self.state == "Safe":
-            #self.setEnabled(False)
+        elif self.state == "Safe": # safe non-blank square
             self.setText(str(self.number))
             self.setStyleSheet("background-color: #787878;")
             self.uncovered = True
             print(self.text(), self.state)
-        elif self.state == "Mine":
+        elif self.state == "Mine": # square is a mine
             print("mine")
             endGame(self)
 
+    # handle right clicks on the square
     def rightClickHandle(self):
         if not self.uncovered and not self.flagged:
             self.setIcon(QIcon('flag.png'))
@@ -77,18 +79,18 @@ class Square(QPushButton):
             self.setIcon(QIcon())
             self.flagged = False
             
-
+    # determine how to display a square once uncovered
     def showSquare(self):
         global GRID
-        if self.state == "Safe" and self.number == 0:
+        if self.state == "Safe" and self.number == 0: # blank square
             self.setEnabled(False)
             self.setStyleSheet("background-color: #787878;")
-        elif self.state == "Safe":
-            #self.setEnabled(False)
+        elif self.state == "Safe": # non-blank square
             self.setText(str(self.number))
             self.setStyleSheet("background-color: #787878;")
             print(self.text(), self.state)
 
+    # determine how many mines are adjacent to square
     def getNumber(self):
         global GRID
         num = 0
@@ -101,10 +103,11 @@ class Square(QPushButton):
                     pass
         self.number = num
         return num
-    
+
+    # method for uncovering the state of square to user
     def uncover(self):
         self.uncovered = True
-        if self.state == "Safe" and self.number == 0:
+        if self.state == "Safe" and self.number == 0: # recursively uncover all adjacent squares given a 0-mine tile
             self.showSquare()
             for i in range(self.x-1, self.x+2):
                 for j in range(self.y-1, self.y+2):
@@ -116,9 +119,7 @@ class Square(QPushButton):
         elif self.state == "Safe":
             self.showSquare()
 
-
-
-
+# end game due to clicking a bad square
 def endGame(mine):
     global GRID
     global LENGTH
@@ -131,7 +132,7 @@ def endGame(mine):
             GRID[i][j].setEnabled(False)
     mine.setStyleSheet("background-color: red;")
 
-
+# main function
 def runGame():
     global GRID
     global LENGTH
@@ -165,7 +166,7 @@ def runGame():
     window.setLayout(gr)
     print("done")
 
-
+# initialize vars and run the game
 if __name__ == "__main__":
     LENGTH = 23
     WIDTH = 23
